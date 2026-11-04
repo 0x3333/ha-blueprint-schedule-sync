@@ -1,0 +1,78 @@
+blueprint:
+  name: Sync devices with Schedule
+  description: >
+    Keeps N devices in sync with a Schedule entity. When the schedule
+    turns ON, turn_on is called on the devices; when it turns OFF,
+    turn_off is called. Optionally inverts the logic (schedule ON =
+    devices OFF).
+  domain: automation
+  author: Home Assistant Community
+  input:
+    schedule:
+      name: Schedule
+      description: Schedule entity that controls the devices.
+      selector:
+        entity:
+          domain: schedule
+    targets:
+      name: Devices
+      description: >
+        Entities, devices or areas that support turn_on / turn_off
+        (lights, switches, fans, media players, input_boolean, etc.).
+      selector:
+        target: {}
+    invert:
+      name: Invert
+      description: >
+        If enabled, schedule ON turns the devices OFF and schedule OFF
+        turns them ON.
+      default: false
+      selector:
+        boolean: {}
+    sync_on_start:
+      name: Sync on startup
+      description: >
+        Also sync when Home Assistant starts (useful to restore the
+        correct state after a restart).
+      default: true
+      selector:
+        boolean: {}
+
+mode: queued
+max_exceeded: silent
+
+triggers:
+  - trigger: state
+    entity_id: !input schedule
+    to:
+      - "on"
+      - "off"
+    id: schedule
+  - trigger: homeassistant
+    event: start
+    id: start
+
+variables:
+  schedule_entity: !input schedule
+  invert: !input invert
+  sync_on_start: !input sync_on_start
+  schedule_state: "{{ states(schedule_entity) }}"
+  desired_on: "{{ (schedule_state == 'on') != invert }}"
+
+conditions:
+  - condition: template
+    value_template: >
+      {{ trigger.id == 'schedule' or sync_on_start }}
+  - condition: template
+    value_template: "{{ schedule_state in ['on', 'off'] }}"
+
+actions:
+  - if:
+      - condition: template
+        value_template: "{{ desired_on }}"
+    then:
+      - action: homeassistant.turn_on
+        target: !input targets
+    else:
+      - action: homeassistant.turn_off
+        target: !input targets
