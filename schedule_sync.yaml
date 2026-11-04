@@ -10,7 +10,7 @@ blueprint:
     schedule after a restart, so a device turned on manually will be turned
     off if the schedule is OFF at that moment.
   domain: automation
-  author: 0x3333
+  author: "0x3333"
   homeassistant:
     min_version: 2024.10.0
   source_url: https://github.com/0x3333/ha-blueprint-schedule-sync/blob/main/schedule_sync.yaml
