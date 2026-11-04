@@ -5,6 +5,7 @@ blueprint:
     turns ON, turn_on is called on the devices; when it turns OFF,
     turn_off is called. Optionally inverts the logic (schedule ON =
     devices OFF).
+
     With "Sync on startup" enabled, the devices are forced to match the
     schedule after a restart, so a device turned on manually will be turned
     off if the schedule is OFF at that moment.
