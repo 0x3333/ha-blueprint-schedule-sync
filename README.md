@@ -34,6 +34,7 @@ Or go to **Settings → Automations & Scenes → Blueprints → Import Blueprint
 | **Devices** | Entities, devices or areas to control | — |
 | **Invert** | Schedule ON turns devices OFF, and vice versa | `false` |
 | **Sync on startup** | Run the sync when Home Assistant starts | `true` |
+| **Startup delay** | Wait before the startup sync, so devices can connect | `30s` |
 
 ## How it works
 

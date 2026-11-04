@@ -5,8 +5,14 @@ blueprint:
     turns ON, turn_on is called on the devices; when it turns OFF,
     turn_off is called. Optionally inverts the logic (schedule ON =
     devices OFF).
+    With "Sync on startup" enabled, the devices are forced to match the
+    schedule after a restart, so a device turned on manually will be turned
+    off if the schedule is OFF at that moment.
   domain: automation
-  author: Home Assistant Community
+  author: 0x3333
+  homeassistant:
+    min_version: 2024.10.0
+  source_url: https://github.com/0x3333/ha-blueprint-schedule-sync/blob/main/schedule_sync.yaml
   input:
     schedule:
       name: Schedule
@@ -37,6 +43,15 @@ blueprint:
       default: true
       selector:
         boolean: {}
+    startup_delay:
+      name: Startup delay
+      description: >
+        Time to wait after Home Assistant starts before syncing, so that
+        devices (e.g. ESPHome) have time to connect.
+      default:
+        seconds: 30
+      selector:
+        duration: {}
 
 mode: queued
 max_exceeded: silent
@@ -68,11 +83,18 @@ conditions:
 
 actions:
   - if:
+      - condition: trigger
+        id: start
+    then:
+      - delay: !input startup_delay
+  - if:
       - condition: template
         value_template: "{{ desired_on }}"
     then:
       - action: homeassistant.turn_on
+        continue_on_error: true
         target: !input targets
     else:
       - action: homeassistant.turn_off
+        continue_on_error: true
         target: !input targets
